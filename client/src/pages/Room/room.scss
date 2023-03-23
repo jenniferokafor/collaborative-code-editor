@@ -1,0 +1,18 @@
+.CodeInputWrapper {
+  display: flex;
+  gap: 16px;
+  width: 100%;
+  height: 50vh;
+  background-color: #242c3c;
+}
+
+.CodeOutputWrapper {
+  width: 100%;
+  height: 50vh;
+  border: 1px solid blue;
+
+  iframe {
+    width: 100%;
+    height: 100%;
+  }
+}
