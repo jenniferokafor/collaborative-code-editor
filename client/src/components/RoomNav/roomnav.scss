@@ -4,4 +4,43 @@
   justify-content: space-between;
   align-items: center;
   padding: 0 20px;
+  background-color: #242c3c;
+  color: #fff;
+  border-bottom: 1px solid #464963;
+
+  h1 {
+    margin: 0;
+    color: #b7ba62;
+    font-size: 20px;
+  }
+}
+
+.roomNavButtons {
+  display: flex;
+  gap: 20px;
+
+    button {
+        background-color: transparent;
+        border: none;
+        color: #fff;
+        cursor: pointer;
+        font-size: 16px;
+        font-weight: 500;
+        padding: 10px 15px;
+        transition: all 0.2s ease-in-out;
+
+        &:hover {
+        background-color: #464963;
+        }
+    }
+}
+
+.roomNavVisitorsCount {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+
+  p {
+    margin: 0;
+  }
 }

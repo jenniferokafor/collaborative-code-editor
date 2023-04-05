@@ -1,9 +1,10 @@
 import { Routes, Route } from "react-router-dom";
 import Room from "../pages/Room";
+import Home from "../pages/Home";
 const Views = () => {
   return (
     <Routes>
-      <Route path="/" element={<div>Home</div>} />
+      <Route path="/" element={<Home />} />
       <Route path="/room/:id" element={<Room />} />
     </Routes>
   );

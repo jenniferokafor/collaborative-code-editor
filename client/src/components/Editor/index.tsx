@@ -1,3 +1,4 @@
+import { useRef } from "react";
 import CodeMirror from "@uiw/react-codemirror";
 import { tokyoNightStorm } from "@uiw/codemirror-theme-tokyo-night-storm";
 import { EditorProps } from "./types";

@@ -1,6 +1,8 @@
+import { ViewUpdate } from "@codemirror/view";
+
 export interface EditorProps {
-  name: string;
-  value: string;
-  onChange: (value: string) => void;
   extensions?: any[];
+  name: string;
+  onChange: (value: string, viewUpdate: ViewUpdate) => void;
+  value: string;
 }
