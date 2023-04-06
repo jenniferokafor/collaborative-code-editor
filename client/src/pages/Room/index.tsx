@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-// import { debounce } from "lodash";
+import { debounce } from "lodash";
 import Editor from "../../components/Editor";
 import { langs } from "@uiw/codemirror-extensions-langs";
 import io from "socket.io-client";
@@ -10,23 +10,9 @@ const Room = () => {
   const [html, setHtml] = useState("");
   const [css, setCss] = useState("");
   const [js, setJs] = useState("");
-  const [src, setSrc] = useState("");
   const [userCount, setUserCount] = useState(0);
   const socket = io("http://localhost:3001");
   const { id } = useParams<{ id: string }>();
-
-  useEffect(() => {
-    const timeout = setTimeout(() => {
-      setSrc(
-        `<html>
-        <body>${html}</body>
-        <style>${css}</style>
-        <script>${js}</script>
-        </html>`
-      );
-    }, 350);
-    return () => clearTimeout(timeout);
-  }, [html, css, js]);
 
   useEffect(() => {
     socket.emit("join_room", id);
@@ -57,6 +43,11 @@ const Room = () => {
     });
   }, [socket]);
 
+  // function to sync the code between users
+  const emitCode = debounce((value, event, type) => {
+    socket.emit(event, { [type]: value, room: id });
+  }, 350);
+
   return (
     <div>
       <RoomNav roomName={id || ""} userCount={userCount} />
@@ -65,17 +56,15 @@ const Room = () => {
           name={"HTML"}
           value={html}
           onChange={(value) => {
-            setHtml(value);
-            socket.emit("html_change", { html: value, room: id });
+            emitCode(value, "html_change", "html");
           }}
           extensions={[langs.html()]}
         />
         <Editor
           name={"CSS"}
           value={css}
-          onChange={(value, viewUpdate) => {
-            setCss(value);
-            socket.emit("css_change", { css: value, room: id });
+          onChange={(value) => {
+            emitCode(value, "css_change", "css");
           }}
           extensions={[langs.css()]}
         />
@@ -83,14 +72,21 @@ const Room = () => {
           name={"JS"}
           value={js}
           onChange={(value) => {
-            setJs(value);
-            socket.emit("js_change", { js: value, room: id });
+            emitCode(value, "js_change", "js");
           }}
           extensions={[langs.javascript()]}
         />
       </section>
       <section className="CodeOutputWrapper">
-        <iframe srcDoc={src} title="output" sandbox="allow-scripts" />
+        <iframe
+          srcDoc={`<html>
+        <body>${html}</body>
+        <style>${css}</style>
+        <script>${js}</script>
+        </html>`}
+          title="output"
+          sandbox="allow-scripts"
+        />
       </section>
     </div>
   );

@@ -26,6 +26,19 @@ io.on("connection", (socket: Socket) => {
     io.in(data).emit("user_count", io.sockets.adapter.rooms.get(data).size);
   });
 
+  // getting code changes
+  socket.on("html_change", (data) => {
+    //send change to everyone including sender
+    io.in(data.room).emit("receive_html", data);
+  });
+  socket.on("css_change", (data) => {
+    io.in(data.room).emit("receive_css", data);
+  });
+  socket.on("js_change", (data) => {
+    io.in(data.room).emit("receive_js", data);
+  });
+
+  // disconnect
   socket.on("disconnect", () => {
     if (currentRoom) {
       socket.leave(currentRoom);
@@ -34,17 +47,6 @@ io.on("connection", (socket: Socket) => {
         io.sockets.adapter.rooms.get(currentRoom)?.size || 0
       );
     }
-  });
-
-  // getting code changes
-  socket.on("html_change", (data) => {
-    io.in(currentRoom).emit("receive_html", data);
-  });
-  socket.on("css_change", (data) => {
-    io.in(currentRoom).emit("receive_css", data);
-  });
-  socket.on("js_change", (data) => {
-    io.in(currentRoom).emit("receive_js", data);
   });
 });
 

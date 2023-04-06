@@ -1,9 +1,10 @@
-import { useRef } from "react";
 import CodeMirror from "@uiw/react-codemirror";
 import { tokyoNightStorm } from "@uiw/codemirror-theme-tokyo-night-storm";
 import { EditorProps } from "./types";
 import "./editor.scss";
+
 const Editor = ({ name, value, onChange, extensions }: EditorProps) => {
+  //prevent cursor from moving to the top of the editor
   return (
     <div className={"EditorWrapper"}>
       <div className={"EditorBar"}>
