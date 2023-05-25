@@ -1,0 +1,24 @@
+{
+  "kind": "collectionType",
+  "collectionName": "rooms",
+  "info": {
+    "singularName": "room",
+    "pluralName": "rooms",
+    "displayName": "Room",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "roomId": {
+      "type": "uid",
+      "required": true
+    },
+    "code": {
+      "type": "json",
+      "required": true
+    }
+  }
+}

@@ -5,6 +5,7 @@ import "./editor.scss";
 
 const Editor = ({ name, value, onChange, extensions }: EditorProps) => {
   //prevent cursor from moving to the top of the editor
+
   return (
     <div className={"EditorWrapper"}>
       <div className={"EditorBar"}>

@@ -1,23 +1,31 @@
 {
   "name": "server",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.ts",
+  "private": true,
+  "version": "0.1.0",
+  "description": "A Strapi application",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node index.ts"
+    "develop": "strapi develop",
+    "start": "strapi start",
+    "build": "strapi build",
+    "strapi": "strapi"
   },
-  "author": "",
-  "license": "ISC",
+  "devDependencies": {},
   "dependencies": {
-    "@types/express": "^4.17.17",
-    "@types/node": "^18.15.11",
-    "@types/uuid": "^9.0.1",
-    "cors": "^2.8.5",
-    "express": "^4.18.2",
-    "nodemon": "^2.0.22",
-    "socket.io": "^4.6.1",
-    "ts-node": "^10.9.1",
-    "typescript": "^5.0.2"
-  }
+    "@strapi/plugin-i18n": "4.10.6",
+    "@strapi/plugin-users-permissions": "4.10.6",
+    "@strapi/strapi": "4.10.6",
+    "better-sqlite3": "8.0.1",
+    "strapi-plugin-io": "^1.1.4"
+  },
+  "author": {
+    "name": "A Strapi developer"
+  },
+  "strapi": {
+    "uuid": "95d564db-1184-437e-9ff8-4499fc4ae8c9"
+  },
+  "engines": {
+    "node": ">=14.19.1 <=18.x.x",
+    "npm": ">=6.0.0"
+  },
+  "license": "MIT"
 }

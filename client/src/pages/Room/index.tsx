@@ -1,94 +1,113 @@
-import { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
-import { debounce } from "lodash";
-import Editor from "../../components/Editor";
-import { langs } from "@uiw/codemirror-extensions-langs";
-import io from "socket.io-client";
-import "./room.scss";
-import RoomNav from "../../components/RoomNav";
+import { useState, useEffect } from 'react'
+import { useParams } from 'react-router-dom'
+import { debounce } from 'lodash'
+import Editor from '../../components/Editor'
+import { langs } from '@uiw/codemirror-extensions-langs'
+import io from 'socket.io-client'
+import './room.scss'
+import RoomNav from '../../components/RoomNav'
+import { useMutation, useQuery } from 'react-query'
+import { getSingleRoom, updateCode } from '../../api'
 const Room = () => {
-  const [html, setHtml] = useState("");
-  const [css, setCss] = useState("");
-  const [js, setJs] = useState("");
-  const [userCount, setUserCount] = useState(0);
-  const socket = io("http://localhost:3001");
-  const { id } = useParams<{ id: string }>();
+    const [html, setHtml] = useState('')
+    const [css, setCss] = useState('')
+    const [js, setJs] = useState('')
+    const [userCount, setUserCount] = useState(0)
+    const [lastUpdated, setLastUpdated] = useState(Date.now())
+    // const socket = io('http://localhost:1337')
+    const { id } = useParams<{ id: string }>()
+    const [dbId, setDbId] = useState('')
 
-  useEffect(() => {
-    socket.emit("join_room", id);
+    const over250ms = lastUpdated ? Date.now() - lastUpdated > 250 : null
+    const payload = { html, js, css }
 
-    return () => {
-      socket.emit("leave_room", id);
-    };
-  }, [id]);
+    //fetch the room data
+    const { isLoading } = useQuery(
+        'get-room-data',
+        () => getSingleRoom(id || ''),
+        {
+            refetchOnWindowFocus: false,
+            onSuccess: res => {
+                const code = res?.data?.data?.attributes?.code
+                setHtml(code?.html || '')
+                setCss(code?.css || '')
+                setJs(code?.js || '')
+                setDbId(res?.data?.data?.id || '')
+            },
+            onError: (err: any) => {
+                console.log(err)
+            },
+        },
+    )
 
-  useEffect(() => {
-    socket.on("receive_html", (data) => {
-      setHtml(data.html);
-    });
+    const { mutate } = useMutation(
+        'update-code',
+        () => updateCode(dbId, { data: { code: payload } }),
+        {
+            retry: false,
+            onSuccess: res => {
+                console.log(res)
+                setLastUpdated(Date.now())
+            },
+        },
+    )
 
-    socket.on("receive_css", (data) => {
-      setCss(data.css);
-    });
-
-    socket.on("receive_js", (data) => {
-      setJs(data.js);
-    });
-  }, [socket]);
-
-  //get the count of users in the room
-  useEffect(() => {
-    socket.on("user_count", (data) => {
-      setUserCount(data);
-    });
-  }, [socket]);
-
-  // function to sync the code between users
-  const emitCode = debounce((value, event, type) => {
-    socket.emit(event, { [type]: value, room: id });
-  }, 350);
-
-  return (
-    <div>
-      <RoomNav roomName={id || ""} userCount={userCount} />
-      <section className="CodeInputWrapper">
-        <Editor
-          name={"HTML"}
-          value={html}
-          onChange={(value) => {
-            emitCode(value, "html_change", "html");
-          }}
-          extensions={[langs.html()]}
-        />
-        <Editor
-          name={"CSS"}
-          value={css}
-          onChange={(value) => {
-            emitCode(value, "css_change", "css");
-          }}
-          extensions={[langs.css()]}
-        />
-        <Editor
-          name={"JS"}
-          value={js}
-          onChange={(value) => {
-            emitCode(value, "js_change", "js");
-          }}
-          extensions={[langs.javascript()]}
-        />
-      </section>
-      <section className="CodeOutputWrapper">
-        <iframe
-          srcDoc={`<html>
+    //handle code change
+    const handleCodeChange = (value: string, lang: 'html' | 'js' | 'css') => {
+        payload[`${lang}`] = value
+        if (lang === 'html') {
+            setHtml(value)
+        } else if (lang === 'css') {
+            setCss(value)
+        } else if (lang === 'js') {
+            setJs(value)
+        }
+        //todo: fix how this prevents the last update from being sent
+        if (over250ms) {
+            mutate()
+        }
+    }
+    return (
+        <div>
+            <RoomNav roomName={id || ''} userCount={userCount} />
+            <section className="CodeInputWrapper">
+                <Editor
+                    name={'HTML'}
+                    value={html}
+                    onChange={value => {
+                        handleCodeChange(value, 'html')
+                    }}
+                    extensions={[langs.html()]}
+                />
+                <Editor
+                    name={'CSS'}
+                    value={css}
+                    onChange={value => {
+                        handleCodeChange(value, 'css')
+                    }}
+                    extensions={[langs.css()]}
+                />
+                <Editor
+                    name={'JS'}
+                    value={js}
+                    onChange={value => {
+                        handleCodeChange(value, 'js')
+                    }}
+                    extensions={[langs.javascript()]}
+                />
+            </section>
+            <section className="CodeOutputWrapper">
+                <iframe
+                    srcDoc={`<html>
         <body>${html}</body>
         <style>${css}</style>
         <script>${js}</script>
         </html>`}
-          title="output"
-          sandbox="allow-scripts"
-        />
-      </section>
-    </div>
-  );
-};
-export default Room;
+                    title="output"
+                    sandbox="allow-scripts"
+                />
+            </section>
+        </div>
+    )
+}
+export default Room
