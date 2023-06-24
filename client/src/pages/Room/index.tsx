@@ -6,7 +6,8 @@ import './room.scss'
 import RoomNav from '../../components/RoomNav'
 import { useMutation, useQuery } from 'react-query'
 import { getSingleRoom, updateCode } from '../../api'
-import io from 'socket.io-client'
+// import io from 'socket.io-client'
+import { io } from 'socket.io-client'
 const Room = () => {
     const [html, setHtml] = useState('')
     const [css, setCss] = useState('')
@@ -18,6 +19,7 @@ const Room = () => {
     const over250ms = lastUpdated ? Date.now() - lastUpdated > 250 : null
     const payload = { html, js, css }
     const socketUrl = 'http://localhost:1337'
+    // const socket = io(socketUrl)
     const socket = io(socketUrl)
 
     useEffect(() => {
@@ -27,21 +29,18 @@ const Room = () => {
 
         // disconnect cleanup
         return () => {
-            socket.disconnect()
+            socket.on('disconnect', () => {
+                console.log('Disconnected from server')
+            })
         }
     }, [])
 
     useEffect(() => {
-        socket.emit('code_updated', { room: id })
-
-        socket.on('code_updated', (data: any) => {
-            console.log('updated', data)
+        socket.on(`${id}_code_updated`, (data: any) => {
+            setHtml(data?.html)
+            setCss(data?.css)
+            setJs(data?.js)
         })
-
-        //cleanup
-        return () => {
-            socket.off('code_updated')
-        }
     }, [socket, id])
 
     //fetch the room data
@@ -69,7 +68,6 @@ const Room = () => {
         {
             retry: false,
             onSuccess: res => {
-                console.log(res)
                 setLastUpdated(Date.now())
             },
         },

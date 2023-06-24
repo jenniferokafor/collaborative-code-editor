@@ -25,6 +25,16 @@ export default {
     io.on("connection", function (socket) {
       console.log("a user connected");
 
+      // emit to clients when room code is updated
+      strapi.db.lifecycles.subscribe((event) => {
+        if (event.action === "afterUpdate") {
+          socket.emit(
+            `${event?.result?.roomId}_code_updated`,
+            event?.result?.code
+          );
+        }
+      });
+
       // emit when user disconnects
       socket.on("disconnect", () => {
         console.log("user disconnected");
