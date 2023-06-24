@@ -19,24 +19,21 @@ const Room = () => {
     const over250ms = lastUpdated ? Date.now() - lastUpdated > 250 : null
     const payload = { html, js, css }
     const socketUrl = 'http://localhost:1337'
-    // const socket = io(socketUrl)
     const socket = io(socketUrl)
 
+    //join the room
     useEffect(() => {
-        socket.on('connect', () => {
-            console.log('Connected to server')
-        })
+        socket.emit('join_room', id)
 
-        // disconnect cleanup
+        //cleanup
         return () => {
-            socket.on('disconnect', () => {
-                console.log('Disconnected from server')
-            })
+            socket.emit('leave_room', id)
         }
     }, [])
 
     useEffect(() => {
-        socket.on(`${id}_code_updated`, (data: any) => {
+        socket.on(`updated_code`, (data: any) => {
+            console.log(data)
             setHtml(data?.html)
             setCss(data?.css)
             setJs(data?.js)
@@ -83,10 +80,7 @@ const Room = () => {
         } else if (lang === 'js') {
             setJs(value)
         }
-        //todo: fix how this prevents the last update from being sent
-        if (over250ms) {
-            mutate()
-        }
+        socket.emit(`update_${id}_code`, dbId, payload)
     }
     return (
         <div>
